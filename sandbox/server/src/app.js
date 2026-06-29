@@ -1,19 +1,44 @@
 import express from "express";
 import morgan from "morgan";
-
+import { createPod } from "./kuberneties/pod.js";
+import { createService } from "./kuberneties/service.js";
+import { v7 as uuid } from "uuid"
 
 const app = express();
 
 
 app.use(morgan('dev'));
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/api/sandbox/health', (req, res)=>{
+app.get('/api/sandbox/health', (req, res) => {
     res.status(200).json({
         message: 'sandbox API is healthy',
         status: 'ok'
     })
 });
+
+app.post("/api/sandbox/start", async (req, res) => {
+    try {
+        const sandboxId = uuid();
+
+        await Promise.all([
+            createPod(sandboxId),
+            createService(sandboxId)
+        ]);
+
+        return res.status(201).json({
+            message: "Sandbox environment created successfully",
+            previewUrl: `http://${sandboxId}.localhost`
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            message: "Failed to create sandbox environment"
+        });
+    }
+})
 
 export default app;
