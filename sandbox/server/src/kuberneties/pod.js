@@ -43,6 +43,12 @@ export async function createPod(sandboxId) {
               name: "http",
             },
           ],
+          volumeMounts: [
+            {
+              name: "workspace-volume",
+              mountPath: "/workspace"
+            }
+          ],
           resources: {
             limits: {
               cpu: "500m",
@@ -52,12 +58,6 @@ export async function createPod(sandboxId) {
               cpu: "250m",
               memory: "500Mi",
             },
-            volumeMounts: [
-              {
-                name: "workspace-volume",
-                mountPath: "/workspace"
-              }
-            ]
           },
         },
         {
