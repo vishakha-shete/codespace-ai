@@ -31,12 +31,12 @@ function getProxy(sandboxId) {
     return proxies[sandboxId];
 }
 
-function getagentProxy(sandboxId) {
+function getAgentProxy(sandboxId) {
 
     const target = `http://sandbox-service-${sandboxId}`; // Construct the target URL based on the sandbox ID
 
-    if (!proxies[sandboxId]) {
-        proxies[sandboxId] = createProxyMiddleware({
+    if (!agentProxies[sandboxId]) {
+        agentProxies[sandboxId] = createProxyMiddleware({
             target,
             changeOrigin: true,
             ws: true,

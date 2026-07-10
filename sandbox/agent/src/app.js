@@ -16,22 +16,12 @@ app.get("/", (req, res) => {
 });
 
 app.get("/list-files", async (req, res) => {
-    try {
-        const elements = await fs.promises.readdir(WORKSPACE_DIR);
+    const elements = await fs.promises.readdir(WORKING_DIR);
 
-        res.status(200).json({
-            message: "Elements in the workspace directory",
-            files: elements,
-            status: "success",
-        });
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            message: "Failed to read workspace directory",
-            status: "error",
-        });
-    }
+    res.status(200).json({
+        message: "Elements in the working directory",
+        files: elements,
+    });
 });
 
 export default app;
