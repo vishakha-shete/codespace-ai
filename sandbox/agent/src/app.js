@@ -7,6 +7,7 @@ const WORKSPACE_DIR = "/workspace";
 const app = express();
 
 app.use(morgan("dev"));
+app.use(express.json());
 
 app.get("/", (req, res) => {
     res.status(200).json({
@@ -16,7 +17,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/list-files", async (req, res) => {
-    const elements = await fs.promises.readdir(WORKING_DIR);
+    const elements = await fs.promises.readdir(WORKSPACE_DIR);
 
     res.status(200).json({
         message: "Elements in the working directory",
