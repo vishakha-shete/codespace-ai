@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import fs from "fs";
+import path from "path";
 
 const WORKSPACE_DIR = "/workspace";
 
@@ -72,6 +73,67 @@ app.get("/read-files", async (req, res) => {
     return res.status(200).json({
         message: "Files read successfully",
         files: Object.assign({}, ...results),
+        status: "success",
+    });
+
+});
+
+
+/**
+ * @route PATCH /update-files
+ * @description updates the content of the files specified in the request body. the request body should containe a property 'updates' with a JSON Array of objects 
+ * each object should have a 'file-property' specifting the file path (relative to the working directory) and a 'content' property 
+ * specifiting the new content for the file.
+ */
+
+import path from "path";
+
+app.patch("/update-files", async (req, res) => {
+
+    const updates = req.body.updates;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({
+            message: 'Invalid request body. Expected an "updates" array.',
+            status: "error",
+        });
+    }
+
+    const results = await Promise.all(
+        updates.map(async (update) => {
+
+            const { file, content } = update;
+
+            if (!file || content === undefined) {
+                return {
+                    error: "Invalid update object",
+                };
+            }
+
+            const filePath = path.join(WORKSPACE_DIR, file);
+
+            try {
+
+                await fs.promises.writeFile(filePath, content, "utf-8");
+
+                return {
+                    [file]: "File updated successfully",
+                };
+
+            } catch (err) {
+
+                return {
+                    [file]: `Error updating file: ${err.message}`,
+                };
+
+            }
+
+        })
+    );
+
+    return res.status(200).json({
+        message: "File update results",
+        results,
         status: "success",
     });
 
