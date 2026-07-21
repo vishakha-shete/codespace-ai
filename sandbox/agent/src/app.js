@@ -139,4 +139,36 @@ app.patch("/update-files", async (req, res) => {
 
 });
 
+/**
+ * @route POST /create-files
+ * @description creates new files with the content specified in the request body.
+ * the request body should contain a property 'files' with a JSON Array of objects, each object should have a 'file'
+ * property specifying the file path (relative to the working directory) and a 'content' property
+ * specifying the content for the new file.
+ */
+app.post("/create-files", async(req,res)=>{
+    const files = req.body.files;
+
+    if(!files || !Array.isArray(files)){
+        return res.status(400).json({
+            message: 'Invalid request body. Expected a JSON object with a "files" property containing',
+            status: 'error',
+        })
+    }
+    const results = await promiseHooks.all(files.map(async(fileObj)=>{
+        const {file,content}= fileObj;
+        const filePath = path.join(WORKSPACE_DIR, file);
+        try{
+            await fs.promises.writeFile(filePath, content, 'utf-8');
+            return{
+                [filePath]: 'file created successfully',
+            }
+        }catch(err){
+            return{
+                [filePath]: `Error creating file: ${err.message}`,
+            }
+        }
+    }))
+})
+
 export default app;
