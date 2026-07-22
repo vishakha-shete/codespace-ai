@@ -17,13 +17,83 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/list-files", async (req, res) => {
-    const elements = await fs.promises.readdir(WORKSPACE_DIR);
+/**
+ * @route GET /list-files
+ * @description lists all files in the working directory and its subdirectories. returns a JSON object
+ * with the file paths relative to the working directory. exclude directors like node_modules, .git,
+ * dist, etc.
+ * - eg.{
+ *  "files":[
+ *        "filel.txt",
+ *        "src/file2.txt",
+ *        "src/subdir/file3.txt"
+ *       ]
+ * }
+ */
 
-    res.status(200).json({
-        message: "Elements in the working directory",
-        files: elements,
-    });
+app.get("/list-files", async (req, res) => {
+
+    const listFiles = async (dir, baseDir) => {
+
+        const entries = await fs.promises.readdir(dir, {
+            withFileTypes: true,
+        });
+
+        const files = [];
+
+        const excludedDirs = [
+            "node_modules",
+            ".git",
+            "dist",
+            "build",
+            ".next",
+            ".cache",
+        ];
+
+        for (const entry of entries) {
+
+            const fullPath = path.join(dir, entry.name);
+            const relativePath = path.relative(baseDir, fullPath);
+
+            if (
+                entry.isDirectory() &&
+                excludedDirs.includes(entry.name)
+            ) {
+                continue;
+            }
+
+            if (entry.isDirectory()) {
+                files.push(...await listFiles(fullPath, baseDir));
+            } else {
+                files.push(relativePath);
+            }
+        }
+
+        return files;
+    };
+
+    try {
+
+        const files = await listFiles(
+            WORKSPACE_DIR,
+            WORKSPACE_DIR
+        );
+
+        return res.status(200).json({
+            message: "Files listed successfully",
+            files,
+            status: "success",
+        });
+
+    } catch (err) {
+
+        return res.status(500).json({
+            message: `Error listing files: ${err.message}`,
+            status: "error",
+        });
+
+    }
+
 });
 
 
@@ -146,25 +216,25 @@ app.patch("/update-files", async (req, res) => {
  * property specifying the file path (relative to the working directory) and a 'content' property
  * specifying the content for the new file.
  */
-app.post("/create-files", async(req,res)=>{
+app.post("/create-files", async (req, res) => {
     const files = req.body.files;
 
-    if(!files || !Array.isArray(files)){
+    if (!files || !Array.isArray(files)) {
         return res.status(400).json({
             message: 'Invalid request body. Expected a JSON object with a "files" property containing',
             status: 'error',
         })
     }
-    const results = await promiseHooks.all(files.map(async(fileObj)=>{
-        const {file,content}= fileObj;
+    const results = await promiseHooks.all(files.map(async (fileObj) => {
+        const { file, content } = fileObj;
         const filePath = path.join(WORKSPACE_DIR, file);
-        try{
+        try {
             await fs.promises.writeFile(filePath, content, 'utf-8');
-            return{
+            return {
                 [filePath]: 'file created successfully',
             }
-        }catch(err){
-            return{
+        } catch (err) {
+            return {
                 [filePath]: `Error creating file: ${err.message}`,
             }
         }
