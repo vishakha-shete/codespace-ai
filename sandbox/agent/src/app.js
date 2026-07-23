@@ -9,6 +9,7 @@ const app = express();
 
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
 
 app.get("/", (req, res) => {
     res.status(200).json({
@@ -156,12 +157,10 @@ app.get("/read-files", async (req, res) => {
  * specifiting the new content for the file.
  */
 
-import path from "path";
-
 app.patch("/update-files", async (req, res) => {
 
-    const updates = req.body.updates;
-
+    const { updates } = req.body || {};
+    
     if (!updates || !Array.isArray(updates)) {
         return res.status(400).json({
             message: 'Invalid request body. Expected an "updates" array.',
@@ -225,20 +224,26 @@ app.post("/create-files", async (req, res) => {
             status: 'error',
         })
     }
-    const results = await promiseHooks.all(files.map(async (fileObj) => {
+    const results = await Promise.all(files.map(async (fileObj) => {
         const { file, content } = fileObj;
         const filePath = path.join(WORKSPACE_DIR, file);
         try {
             await fs.promises.writeFile(filePath, content, 'utf-8');
             return {
-                [filePath]: 'file created successfully',
-            }
+                file,
+                message: "File created successfully",
+            };
         } catch (err) {
             return {
                 [filePath]: `Error creating file: ${err.message}`,
             }
         }
-    }))
+    }));
+    res.status(200).json({
+        message: "Files created successfully",
+        results,
+        status: "success",
+    });
 })
 
 export default app;
