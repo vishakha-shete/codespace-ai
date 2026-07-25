@@ -160,7 +160,7 @@ app.get("/read-files", async (req, res) => {
 app.patch("/update-files", async (req, res) => {
 
     const { updates } = req.body || {};
-    
+
     if (!updates || !Array.isArray(updates)) {
         return res.status(400).json({
             message: 'Invalid request body. Expected an "updates" array.',
@@ -224,21 +224,34 @@ app.post("/create-files", async (req, res) => {
             status: 'error',
         })
     }
-    const results = await Promise.all(files.map(async (fileObj) => {
-        const { file, content } = fileObj;
-        const filePath = path.join(WORKSPACE_DIR, file);
-        try {
-            await fs.promises.writeFile(filePath, content, 'utf-8');
-            return {
-                file,
-                message: "File created successfully",
-            };
-        } catch (err) {
-            return {
-                [filePath]: `Error creating file: ${err.message}`,
+    const results = await Promise.all(
+        files.map(async ({ file, content }) => {
+
+            const filePath = path.join(WORKSPACE_DIR, file);
+            try {
+                // Create all parent folders if they don't exist
+                await fs.promises.mkdir(
+                    path.dirname(filePath),
+                    { recursive: true }
+                );
+
+                // Create the file
+                await fs.promises.writeFile(
+                    filePath,
+                    content,
+                    "utf-8"
+                );
+                return {
+                    file,
+                    message: "file created successfully",
+                }
+            } catch (err) {
+                return {
+                    file,
+                    message: `Error creating file: ${err.message}`,
+                };
             }
-        }
-    }));
+        }));
     res.status(200).json({
         message: "Files created successfully",
         results,
