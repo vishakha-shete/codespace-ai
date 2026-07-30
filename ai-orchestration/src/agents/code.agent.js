@@ -27,7 +27,7 @@ const result = await agent.invoke({
     messages: [
         {
             role: "user",
-            content: "Create a modern responsive home page for an online food ordering website.",
+            content: "Create a modern home page for an online food ordering website.",
         },
     ],
 });
