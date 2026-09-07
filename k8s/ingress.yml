@@ -30,8 +30,8 @@ spec:
     - host: "*.preview.localhost"
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - pathType: Prefix
+            path: "/"
             backend:
               service:
                 name: router-service
@@ -41,8 +41,8 @@ spec:
     - host: "*.agent.localhost"
       http:
         paths:
-          - path: /
-            pathType: Prefix
+          - pathType: Prefix
+            path: "/"
             backend:
               service:
                 name: router-service
