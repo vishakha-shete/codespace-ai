@@ -23,13 +23,4 @@ const agent = createAgent({
     tools: [ListFiles, readFiles, UpdateFiles],
 })
 
-const result = await agent.invoke({
-    messages: [
-        {
-            role: "user",
-            content: "Create a modern home page for an online food ordering website.",
-        },
-    ],
-});
-
-console.dir(result, { depth: null });
+export default agent;
