@@ -14,7 +14,11 @@ agentRouter.post("/invoke", async (req, res) => {
         });
         res.json({ response });
     } catch (error) {
-        console.error("Error invoking agent:", error);
+        console.error("Error invoking agent:", {
+            statusCode: error?.statusCode,
+            message: error?.message,
+            body: error?.body
+        });
 
         if (error?.statusCode === 429) {
             return res.status(429).json({
