@@ -10,7 +10,7 @@ export const ListFiles = tool(
       console.log("=====================");
 
       const url =
-        "http://sandbox-service-01a0edec-a7d1-76e5-85f3-3a71890cbc30:3000/list-files";
+        "http://sandbox-service-01a11ab4-290e-7403-bd25-7b9261a0a663:3000/list-files";
 
       console.log("Calling:", url);
 
@@ -51,7 +51,7 @@ export const readFiles = tool(
         console.log("=====================")
 
         const response = await axios.get(
-            "http://sandbox-service-01a0edec-a7d1-76e5-85f3-3a71890cbc30:3000/read-files?files=" +
+            "http://sandbox-service-01a11ab4-290e-7403-bd25-7b9261a0a663:3000/read-files?files=" +
             files.join(",")
         );
         console.log("=======================================")
@@ -76,7 +76,7 @@ export const UpdateFiles = tool(
         console.log("=====================")
 
         const response = await axios.patch(
-            "http://sandbox-service-01a0edec-a7d1-76e5-85f3-3a71890cbc30:3000/update-files",
+            "http://sandbox-service-01a11ab4-290e-7403-bd25-7b9261a0a663:3000/update-files",
             {
                 updates: files,
             }
